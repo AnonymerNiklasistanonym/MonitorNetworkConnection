@@ -6,7 +6,7 @@ import tcpp from "tcp-ping";
 export const testUrl = async (url: string, attempts: number): Promise<TestUrlResult> => new Promise(resolve => {
     const date = new Date();
     dns.lookup(url, (err, ipAddress) => {
-        if (err && err.code === "ENOTFOUND") {
+        if (err && err.code === "ENOTFOUND" || ipAddress === undefined) {
             console.error(err);
             return resolve({
                 connectionAttempts: -1,
@@ -21,8 +21,9 @@ export const testUrl = async (url: string, attempts: number): Promise<TestUrlRes
         } else {
 
             tcpp.ping({ address: ipAddress, attempts }, (pingErr, data) => {
-                if (pingErr) {
-                    console.error(pingErr);
+                const allAttemptsAreErrors = data.results.filter(result => (result as any).err).length === attempts
+                if (pingErr || allAttemptsAreErrors) {
+                    console.error(pingErr ? pingErr : data.results.map(result => (result as any).err));
                     return resolve({
                         connectionAttempts: attempts,
                         connectionSpeedMsAvg: -1,
