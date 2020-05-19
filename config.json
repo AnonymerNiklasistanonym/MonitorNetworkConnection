@@ -1,0 +1,16 @@
+{
+    "attempts": 5,
+    "urls": [
+        "google.de",
+        "twitch.tv",
+        "youtube.com",
+        "en.wikipedia.org",
+        "amazon.com",
+        "reddit.com",
+        "google.com",
+        "netflix.com",
+        "github.com",
+        "gitlab.com",
+        "spotify.com"
+    ]
+}
