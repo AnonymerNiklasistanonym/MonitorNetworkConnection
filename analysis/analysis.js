@@ -140,10 +140,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 	var colorNames = Object.keys(chartColors);
 
 
-	let labels = []
-	for (const url in data) {
-		labels = data[url].DATE_ISO.map(a => new Date(a))
-	}
+	const minThreshold = 20.0
+	const maxThreshold = 90.0
+
+	const skipMax = 40
+	let latestDate = undefined
+	let oldestDate = undefined
+	let maxLabelCount = 0
 	const datasets = []
 	for (const url in data) {
 		const colorName = colorNames[datasets.length % colorNames.length];
@@ -151,11 +154,34 @@ document.addEventListener('DOMContentLoaded', async () => {
 		const datasetData = []
 		const dataSpeedAvg = data[url].CONNECTION_SPEED_MS_AVG.map(a => Number(a))
 		const dataDates = data[url].DATE_ISO.map(a => new Date(a))
+		let skipCounter = 0
+		let labelCount = 0
 		for (let i = 0; i < dataDates.length; i++) {
+			if (oldestDate === undefined || oldestDate > dataDates[i]) {
+				oldestDate = moment(dataDates[i])
+			}
+			if (latestDate === undefined || latestDate < dataDates[i]) {
+				latestDate = moment(dataDates[i])
+			}
+			// Skip elements if
+			//if (i > 0 && dataSpeedAvg[i] !== -1 && ++skipCounter < skipMax) {
+			//	// Sto
+			//	// Skip element if there is nearly a difference
+			//	let difference = Math.pow(dataSpeedAvg[i - 1], 2) - Math.pow(dataSpeedAvg[i], 2)
+			//	if (dataSpeedAvg[i - 1] !== -1 && (difference > maxThreshold || difference < minThreshold)) {
+			//		continue;
+			//	}
+			//} else {
+			//	skipCounter = 0
+			//}
+			labelCount++
 			datasetData.push({
-				x: moment(dataDates[i]),
+				x: dataDates[i],
 				y: dataSpeedAvg[i] == -1 ? -100 : dataSpeedAvg[i]
 			})
+		}
+		if (labelCount > maxLabelCount) {
+			maxLabelCount = labelCount
 		}
 		datasets.push({
 			label: url,
@@ -166,112 +192,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 		})
 	}
 
-	var timeFormat = 'MM/DD/YYYY';
-
-	function newDate(days) {
-		return moment().add(days, 'd').toDate();
+	let currentDate = oldestDate
+	let labels = [ ]
+	;
+	const minutesDuration = moment.duration(latestDate.diff(oldestDate)).asMinutes();
+	const minutesDelta = minutesDuration / maxLabelCount
+	while (currentDate < latestDate) {
+		labels.push(currentDate.toDate())
+		currentDate = currentDate.add(minutesDelta, 'm')
 	}
+	console.log(labels)
 
-	function newDateString(days) {
-		return moment().add(days, 'd').format(timeFormat);
-	}
-
-
-	var config = {
-		type: 'line',
-		data: {
-			labels /*[ // Date Objects
-				newDate(0),
-				newDate(1),
-				newDate(2),
-				newDate(3),
-				newDate(4),
-				newDate(5),
-				newDate(6)
-			]*/,
-			datasets /*: [{
-				label: 'My First dataset',
-				backgroundColor: color(chartColors.red).alpha(0.5).rgbString(),
-				borderColor: chartColors.red,
-				fill: false,
-				data: [
-					randomScalingFactor(),
-					randomScalingFactor(),
-					randomScalingFactor(),
-					randomScalingFactor(),
-					randomScalingFactor(),
-					randomScalingFactor(),
-					randomScalingFactor()
-				],
-			}, {
-				label: 'My Second dataset',
-				backgroundColor: color(chartColors.blue).alpha(0.5).rgbString(),
-				borderColor: chartColors.blue,
-				fill: false,
-				data: [
-					randomScalingFactor(),
-					randomScalingFactor(),
-					randomScalingFactor(),
-					randomScalingFactor(),
-					randomScalingFactor(),
-					randomScalingFactor(),
-					randomScalingFactor()
-				],
-			}, {
-				label: 'Dataset with point data',
-				backgroundColor: color(chartColors.green).alpha(0.5).rgbString(),
-				borderColor: chartColors.green,
-				fill: false,
-				data: [{
-					x: newDateString(0),
-					y: randomScalingFactor()
-				}, {
-					x: newDateString(5),
-					y: randomScalingFactor()
-				}, {
-					x: newDateString(7),
-					y: randomScalingFactor()
-				}, {
-					x: newDateString(15),
-					y: randomScalingFactor()
-				}],
-			}]*/
-		},
-		options: {
-			title: {
-				text: 'Chart.js Time Scale'
-			},
-			scales: {
-				xAxes: {
-					type: 'time',
-					time: {
-						format: "HH:mm",
-						unit: 'hour',
-						unitStepSize: 1,
-						displayFormats: {
-						  'minute': 'HH:mm',
-						  'hour': 'HH:mm',
-						  min: '00:00',
-						  max: '23:59'
-						}
-					},
-					scaleLabel: {
-						display: true,
-						labelString: 'Date'
-					}
-				},
-				y: {
-					scaleLabel: {
-						display: true,
-						labelString: 'value'
-					}
-				}
-			},
-		}
-	};
-	console.log(config)
-
-	const ctx = document.getElementById('canvas').getContext('2d');
-	const myLine = new Chart(ctx, config);
+	drawLineGraph(document.getElementById('canvas'), labels, datasets)
 
 }, false);
