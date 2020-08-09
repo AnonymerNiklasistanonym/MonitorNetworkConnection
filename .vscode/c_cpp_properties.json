@@ -1,0 +1,15 @@
+{
+    "configurations": [
+        {
+            "name": "Analysis Cpp",
+            "includePath": [
+                "${workspaceFolder}/analysis_cpp/**",
+                "${workspaceFolder}/analysis_cpp/fast-cpp-csv-parser/**",
+                "${workspaceFolder}/analysis_cpp/fmt/include/**"
+            ],
+            "cppStandard": "c++20",
+            "intelliSenseMode": "gcc-x64"
+        }
+    ],
+    "version": 4
+}
