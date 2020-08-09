@@ -5,6 +5,8 @@ project(dataAnalysis VERSION 1 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+find_package(Threads REQUIRED)
+
 find_package(Git QUIET)
 if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/../.git")
     # Update submodules as needed
@@ -23,11 +25,13 @@ if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/../.git")
             )
         endif()
     endif()
+else()
+    # Error when not cloned via git
+    ## TODO: Find solution how to download the submodule even though the source code is from a tarball
+    message(FATAL_ERROR "Not a git repository or git was not found")
 endif()
 
 add_subdirectory(fmt)
-
-find_package(Threads REQUIRED)
 
 add_executable(${PROJECT_NAME} main.cpp)
 target_include_directories(${PROJECT_NAME} PRIVATE fast-cpp-csv-parser)
