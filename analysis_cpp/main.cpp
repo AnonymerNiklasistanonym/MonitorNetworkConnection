@@ -28,6 +28,25 @@ inline auto getTimeDifference(const std::chrono::time_point<T> &startTimePoint,
     return std::chrono::duration_cast<U>(endTimePoint - startTimePoint).count();
 }
 
+std::time_t parseIsoDateStringToGnuPlotTime2(const std::string &isoDateString)
+{
+    struct tm tm;
+    strptime(isoDateString.c_str(), "%FT%T%z", &tm);
+    return std::mktime(&tm);
+}
+
+std::string parseDateToGnuPlotString2(const time_t &timeObject)
+{
+    tm localTimeObject = *localtime(&timeObject);
+    std::stringstream ss;
+    ss << localTimeObject.tm_mday << "/" << localTimeObject.tm_mon << "/" << localTimeObject.tm_year;
+    return ss.str();
+}
+
+#include <string.h>
+#include <stdio.h>
+#include <time.h>
+
 
 int main()
 {
@@ -54,6 +73,33 @@ int main()
 
         std::cout << std_format::format("Found {} elements with no connection or other problems",
                                         count) << std::endl;
+
+        //std::time_t from;
+        //std::ctime(&from);
+        //std::time_t to;
+        //std::ctime(&to);
+
+        time_t from = csvFileEntries->at(0).dateTimeT;
+        time_t to = csvFileEntries->at(csvFileEntries->size() - 1).dateTimeT;
+        std::optional<float> maxValue = { 1000 };
+        std::optional<std::string> specificUrl = {};
+        const auto gnuplotPathPng = std::filesystem::path("..")  / ".." / "data" / "gnuplot.png";
+        const GnuPlotOptions gnuPlotOptionsPng = {
+            .title = "Avg connection speed time",
+            .size = { 1920 * 8, 1080 * 2 },
+            .outputType = GnuPlotOutputType::PNG_FILE,
+        };
+        plotAvgConnectionSpeedTimelineGnuPlot(csvFileEntries, from, to, gnuplotPathPng, gnuPlotOptionsPng,
+                                              specificUrl, maxValue);
+
+        const auto gnuplotPathPdf = std::filesystem::path("..")  / ".." / "data" / "gnuplot.pdf";
+        const GnuPlotOptions gnuPlotOptionsPdf = {
+            .title = "Avg connection speed time",
+            .size = { 1920 * 8, 1080 * 2 },
+            .outputType = GnuPlotOutputType::PDF_FILE,
+        };
+        plotAvgConnectionSpeedTimelineGnuPlot(csvFileEntries, from, to, gnuplotPathPdf, gnuPlotOptionsPdf,
+                                              specificUrl, maxValue);
     }
     catch (const CsvFileReadException &e) {
         std::cerr << std_format::format("Exception was thrown while reading the CSV file: {}",

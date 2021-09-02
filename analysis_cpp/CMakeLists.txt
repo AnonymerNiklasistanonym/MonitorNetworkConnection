@@ -9,13 +9,18 @@ set(SOURCE_DIR "${PROJECT_DIR}")
 set(VENDOR_DIR_DATE "${PROJECT_DIR}/date")
 set(VENDOR_DIR_FMT "${PROJECT_DIR}/fmt")
 set(VENDOR_DIR_CSV_PARSER "${PROJECT_DIR}/fast-cpp-csv-parser")
+set(VENDOR_DIR_GNUPLOT "${PROJECT_DIR}/gnuplot-iostream")
 
 # Show or hide exact makefile commands
 set(CMAKE_VERBOSE_MAKEFILE on)
 
 # Packages to find
 find_package(Threads REQUIRED)
+find_package(Boost 1.40.0 COMPONENTS filesystem system iostreams REQUIRED)
 find_package(Git QUIET)
+
+# Programs to find
+find_program(PROGRAM_GNUPLOT "gnuplot" REQUIRED)
 
 # Update git submodules when in git repository
 if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/../.git")
@@ -60,7 +65,8 @@ foreach(PROJECT_HEADER_FILE ${PROJECT_HEADER_FILES})
     string(FIND ${PROJECT_HEADER_FILE} ${VENDOR_DIR_DATE} EXCLUDE_DIR_FOUND_DATE)
     string(FIND ${PROJECT_HEADER_FILE} ${VENDOR_DIR_FMT} EXCLUDE_DIR_FOUND_FMT)
     string(FIND ${PROJECT_HEADER_FILE} ${VENDOR_DIR_CSV_PARSER} EXCLUDE_DIR_FOUND_CSV_PARSER)
-    if ((NOT ${EXCLUDE_DIR_FOUND_BIN} EQUAL -1) OR (NOT ${EXCLUDE_DIR_FOUND_DATE} EQUAL -1) OR (NOT ${EXCLUDE_DIR_FOUND_FMT} EQUAL -1) OR (NOT ${EXCLUDE_DIR_FOUND_CSV_PARSER} EQUAL -1))
+    string(FIND ${PROJECT_HEADER_FILE} ${VENDOR_DIR_GNUPLOT} EXCLUDE_DIR_FOUND_GNUPLOT)
+    if ((NOT ${EXCLUDE_DIR_FOUND_BIN} EQUAL -1) OR (NOT ${EXCLUDE_DIR_FOUND_DATE} EQUAL -1) OR (NOT ${EXCLUDE_DIR_FOUND_FMT} EQUAL -1) OR (NOT ${EXCLUDE_DIR_FOUND_CSV_PARSER} EQUAL -1) OR (NOT ${EXCLUDE_DIR_FOUND_GNUPLOT} EQUAL -1))
         list(REMOVE_ITEM PROJECT_HEADER_FILES ${PROJECT_HEADER_FILE})
     else()
         message(STATUS "- ${PROJECT_HEADER_FILE}")
@@ -79,7 +85,8 @@ foreach(PROJECT_SOURCE_FILE ${PROJECT_SOURCE_FILES})
     string(FIND ${PROJECT_SOURCE_FILE} ${VENDOR_DIR_DATE} EXCLUDE_DIR_FOUND_DATE)
     string(FIND ${PROJECT_SOURCE_FILE} ${VENDOR_DIR_FMT} EXCLUDE_DIR_FOUND_FMT)
     string(FIND ${PROJECT_SOURCE_FILE} ${VENDOR_DIR_CSV_PARSER} EXCLUDE_DIR_FOUND_CSV_PARSER)
-    if ((NOT ${EXCLUDE_DIR_FOUND_BIN} EQUAL -1) OR (NOT ${EXCLUDE_DIR_FOUND_DATE} EQUAL -1) OR (NOT ${EXCLUDE_DIR_FOUND_FMT} EQUAL -1) OR (NOT ${EXCLUDE_DIR_FOUND_CSV_PARSER} EQUAL -1))
+    string(FIND ${PROJECT_SOURCE_FILE} ${VENDOR_DIR_GNUPLOT} EXCLUDE_DIR_FOUND_GNUPLOT)
+    if ((NOT ${EXCLUDE_DIR_FOUND_BIN} EQUAL -1) OR (NOT ${EXCLUDE_DIR_FOUND_DATE} EQUAL -1) OR (NOT ${EXCLUDE_DIR_FOUND_FMT} EQUAL -1) OR (NOT ${EXCLUDE_DIR_FOUND_CSV_PARSER} EQUAL -1) OR (NOT ${EXCLUDE_DIR_FOUND_GNUPLOT} EQUAL -1))
         list(REMOVE_ITEM PROJECT_SOURCE_FILES ${PROJECT_SOURCE_FILE})
     else()
         message(STATUS "- ${PROJECT_SOURCE_FILE}")
@@ -190,9 +197,10 @@ if(FORMAT_CODE)
 endif()
 
 add_executable(${PROJECT_NAME} ${PROJECT_MAIN_SOURCE_FILE} ${PROJECT_SOURCE_FILES} ${PROJECT_HEADER_FILES})
-target_include_directories(${PROJECT_NAME} PRIVATE fast-cpp-csv-parser)
-target_include_directories(${PROJECT_NAME} PRIVATE date/include)
-target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt date::date Threads::Threads)
+target_include_directories(${PROJECT_NAME} PRIVATE ${VENDOR_DIR_CSV_PARSER})
+target_include_directories(${PROJECT_NAME} PRIVATE ${VENDOR_DIR_DATE}/include)
+target_include_directories(${PROJECT_NAME} PRIVATE ${VENDOR_DIR_GNUPLOT})
+target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt date::date Threads::Threads Boost::filesystem Boost::system Boost::iostreams)
 
 # Set library source files compilation flags for different compilers
 target_compile_options(

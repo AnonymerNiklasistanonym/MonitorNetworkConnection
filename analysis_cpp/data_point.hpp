@@ -13,6 +13,7 @@ enum ConnectionState {
 
 struct DataPoint {
     std::string dateIsoString;
+    std::time_t dateTimeT;
     std::string url;
     std::string ipAddressV4;
     unsigned int connectionAttempts;

@@ -38,6 +38,18 @@ ConnectionState getConnectionState(const std::string &connectionState)
         }
     }
 
+std::time_t convertIso8601DateStringToLocalTimeT(const std::string &time_string)
+{
+    tzset();
+
+    struct tm ctime;
+    memset(&ctime, 0, sizeof(struct tm));
+    strptime(time_string.c_str(), "%FT%T%z", &ctime);
+
+    std::time_t ts = mktime(&ctime) - timezone;
+    return ts;
+}
+
 DataPointCollection readCsvFile(const std::filesystem::path &filePath)
 {
     // Check if file exists and a regular file
@@ -81,6 +93,7 @@ DataPointCollection readCsvFile(const std::filesystem::path &filePath)
                                          connectionSpeedMsMax, connectionSpeedMsMin)) {
         csvEntries->emplace_back(
             dateIso,
+            convertIso8601DateStringToLocalTimeT(dateIso),
             url,
             ipAddress,
             static_cast<unsigned int>(stoul(connectionAttempts)),
