@@ -22,41 +22,47 @@ namespace std_format = fmt;
 
 
 
-ConnectionState getConnectionState (const std::string& connectionState) {
+ConnectionState getConnectionState(const std::string &connectionState)
+{
     if (connectionState == "CONNECTION") [[likely]] {
         return ConnectionState::CONNECTION;
-    } else if (connectionState == "NO_CONNECTION") {
-        return ConnectionState::NO_CONNECTION;
-    } else if (connectionState == "DNS_LOOKUP_FAILED") {
-        return ConnectionState::DNS_LOOKUP_FAILED;
-    } else [[unlikely]] {
-        throw CsvFileReadException(std_format::format("Unknown connection State (connectionState={})", connectionState));
     }
-}
+    else if (connectionState == "NO_CONNECTION") {
+        return ConnectionState::NO_CONNECTION;
+    }
+    else if (connectionState == "DNS_LOOKUP_FAILED") {
+        return ConnectionState::DNS_LOOKUP_FAILED;
+    }
+    else [[unlikely]] {
+            throw CsvFileReadException(std_format::format("Unknown connection State (connectionState={})",
+                                       connectionState));
+        }
+    }
 
-std::shared_ptr<CsvFileEntries> readCsvFile(const std::filesystem::path& filePath)
+std::shared_ptr<CsvFileEntries> readCsvFile(const std::filesystem::path &filePath)
 {
     // Check if file exists and a regular file
     if (!std::filesystem::exists(filePath)) {
-        throw CsvFileReadException(std_format::format("File was not found (filePath={})", filePath.string()));
+        throw CsvFileReadException(std_format::format("File was not found (filePath={})",
+                                   filePath.string()));
     }
     if (!std::filesystem::is_regular_file(filePath)) {
-        throw CsvFileReadException(std_format::format("File is not a regular file (filePath={})", filePath.string()));
+        throw CsvFileReadException(std_format::format("File is not a regular file (filePath={})",
+                                   filePath.string()));
     }
 
     // Use the included class to read the CSV file
     std::unique_ptr<CsvReader> csvCollectionReader;
-    try
-    {
+    try {
         csvCollectionReader = std::make_unique<CsvReader>(filePath);
     }
-    catch (const io::error::can_not_open_file &except)
-    {
-        throw CsvFileReadException(std_format::format("File could not be opened (filePath={},error={})", filePath.string(), except.what()));
+    catch (const io::error::can_not_open_file &except) {
+        throw CsvFileReadException(std_format::format("File could not be opened (filePath={},error={})",
+                                   filePath.string(), except.what()));
     }
     csvCollectionReader->read_header(io::ignore_extra_column,
-        "DATE_ISO","URL","IP_ADDRESS", "CONNECTION_ATTEMPTS","CONNECTION_STATE",
-        "CONNECTION_SPEED_MS_AVG", "CONNECTION_SPEED_MS_MAX","CONNECTION_SPEED_MS_MIN");
+                                     "DATE_ISO", "URL", "IP_ADDRESS", "CONNECTION_ATTEMPTS", "CONNECTION_STATE",
+                                     "CONNECTION_SPEED_MS_AVG", "CONNECTION_SPEED_MS_MAX", "CONNECTION_SPEED_MS_MIN");
 
     // Create container for CSV entries
     auto csvEntries = std::make_shared<CsvFileEntries>();
@@ -72,9 +78,8 @@ std::shared_ptr<CsvFileEntries> readCsvFile(const std::filesystem::path& filePat
 
     // Read in the rows
     while (csvCollectionReader->read_row(dateIso, url, ipAddress,
-        connectionAttempts, connectionState, connectionSpeedMsAvg,
-        connectionSpeedMsMax, connectionSpeedMsMin))
-    {
+                                         connectionAttempts, connectionState, connectionSpeedMsAvg,
+                                         connectionSpeedMsMax, connectionSpeedMsMin)) {
         csvEntries->emplace_back(
             dateIso,
             url,
@@ -82,14 +87,14 @@ std::shared_ptr<CsvFileEntries> readCsvFile(const std::filesystem::path& filePat
             static_cast<unsigned int>(stoul(connectionAttempts)),
             getConnectionState(connectionState),
             (connectionSpeedMsAvg == "NaN" || connectionSpeedMsAvg.empty())
-                ? std::optional<float>{}
-                : std::stof(connectionSpeedMsAvg),
+            ? std::optional<float> {}
+            : std::stof(connectionSpeedMsAvg),
             (connectionSpeedMsMax == "NaN" || connectionSpeedMsMax.empty())
-                ? std::optional<float>{}
-                : std::stof(connectionSpeedMsMax),
+            ? std::optional<float> {}
+            : std::stof(connectionSpeedMsMax),
             (connectionSpeedMsMin == "NaN" || connectionSpeedMsMin.empty())
-                ? std::optional<float>{}
-                : std::stof(connectionSpeedMsMin)
+            ? std::optional<float> {}
+            : std::stof(connectionSpeedMsMin)
         );
     }
 

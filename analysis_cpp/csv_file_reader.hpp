@@ -25,14 +25,13 @@ struct CsvFileEntry {
     std::optional<float> connectionSpeedMsMin;
 };
 
-struct CsvFileReadException : public std::exception
-{
-   std::string excpetionMessage;
-   CsvFileReadException(const std::string& excpetionMessage) : excpetionMessage(excpetionMessage) {};
-   ~CsvFileReadException() throw () {};
-   const char* what() const throw() { return excpetionMessage.c_str(); };
+struct CsvFileReadException : public std::exception {
+    std::string excpetionMessage;
+    CsvFileReadException(const std::string &excpetionMessage) : excpetionMessage(excpetionMessage) {};
+    ~CsvFileReadException() throw () {};
+    const char *what() const throw() { return excpetionMessage.c_str(); };
 };
 
 using CsvFileEntries = std::vector<CsvFileEntry>;
 
-std::shared_ptr<CsvFileEntries> readCsvFile(const std::filesystem::path& filePath);
+std::shared_ptr<CsvFileEntries> readCsvFile(const std::filesystem::path &filePath);

@@ -30,27 +30,40 @@ inline auto getTimeDifference(const std::chrono::time_point<T> &startTimePoint,
 }
 
 
-int main () {
+int main()
+{
     const auto dataPath = std::filesystem::path("..")  / ".." / "data" / "data.csv";
 
-    auto readCsvFileTimeBegin = std::chrono::high_resolution_clock::now();
-    auto csvFileEntries = readCsvFile(dataPath);
-    auto readCsvFileTimeEnd = std::chrono::high_resolution_clock::now();
+    try {
+        auto readCsvFileTimeBegin = std::chrono::high_resolution_clock::now();
+        auto csvFileEntries = readCsvFile(dataPath);
+        auto readCsvFileTimeEnd = std::chrono::high_resolution_clock::now();
 
-    std::cout << std_format::format("Time to read CSV file: {} ms",
-        getTimeDifference(readCsvFileTimeBegin, readCsvFileTimeEnd)) << std::endl;
+        std::cout << std_format::format("Time to read CSV file: {} ms",
+                                        getTimeDifference(readCsvFileTimeBegin, readCsvFileTimeEnd)) << std::endl;
 
-    std::size_t count = 0;
-    for( auto const& csvFileEntry : *csvFileEntries )
-    {
-        // Check if element has no connection
-        if (csvFileEntry.connectionState != ConnectionState::CONNECTION || !csvFileEntry.connectionSpeedMsAvg.has_value()) {
-            count++;
-            // std::cout << std_format::format("new: Found NO_CONNECTION at {} for {}\n",
-            //     csvFileEntry.dateIsoString, csvFileEntry.url);
+        std::size_t count = 0;
+        for (auto const &csvFileEntry : *csvFileEntries) {
+            // Check if element has no connection
+            if (csvFileEntry.connectionState != ConnectionState::CONNECTION ||
+                !csvFileEntry.connectionSpeedMsAvg.has_value()) {
+                count++;
+                // std::cout << std_format::format("new: Found NO_CONNECTION at {} for {}\n",
+                //     csvFileEntry.dateIsoString, csvFileEntry.url);
+            }
         }
+
+        std::cout << std_format::format("Found {} elements with no connection or other problems",
+                                        count) << std::endl;
     }
-
-    std::cout << std_format::format("Found {} elements with no connection or other problems", count) << std::endl;
-
+    catch (const CsvFileReadException &e) {
+        std::cerr << std_format::format("Exception was thrown while reading the CSV file: {}",
+                                        e.what()) << std::endl;
+        return EXIT_FAILURE;
+    }
+    catch (const std::exception &e) {
+        std::cerr << std_format::format("Unknown exception was thrown: {}",
+                                        e.what()) << std::endl;
+        return EXIT_FAILURE;
+    }
 }
