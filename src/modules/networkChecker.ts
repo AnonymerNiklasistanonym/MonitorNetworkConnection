@@ -21,9 +21,9 @@ export const testUrl = async (url: string, attempts: number): Promise<TestUrlRes
         } else {
 
             tcpp.ping({ address: ipAddress, attempts }, (pingErr, data) => {
-                const allAttemptsAreErrors = data.results.filter(result => (result as any).err).length === attempts
+                const allAttemptsAreErrors = data.results.filter(result => result.err).length === attempts;
                 if (pingErr || allAttemptsAreErrors) {
-                    console.error(pingErr ? pingErr : data.results.map(result => (result as any).err));
+                    console.error(pingErr ? pingErr : data.results.map(result => result.err));
                     return resolve({
                         connectionAttempts: attempts,
                         connectionSpeedMsAvg: -1,

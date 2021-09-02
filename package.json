@@ -23,24 +23,24 @@
   },
   "homepage": "https://github.com/AnonymerNiklasistanonym/MonitorNetworkConnection#readme",
   "dependencies": {
-    "chart.js": "^2.9.3",
-    "csv-parser": "^2.3.2",
+    "chart.js": "^2.9.4",
+    "csv-parser": "^3.0.0",
     "csv-writer": "^1.6.0",
     "express": "^4.17.1",
-    "moment": "^2.26.0",
+    "moment": "^2.29.1",
     "tcp-ping": "^0.1.1"
   },
   "devDependencies": {
-    "@types/node": "^14.0.5",
-    "@types/tcp-ping": "^0.1.1",
-    "@typescript-eslint/eslint-plugin": "^3.0.2",
-    "@typescript-eslint/parser": "^3.0.2",
-    "cross-env": "^7.0.2",
-    "eslint": "^7.1.0",
-    "eslint-plugin-jsdoc": "^26.0.0",
-    "eslint-plugin-prefer-arrow": "^1.2.1",
-    "nodemon": "^2.0.4",
+    "@types/node": "^16.7.10",
+    "@types/tcp-ping": "^0.1.3",
+    "@typescript-eslint/eslint-plugin": "^4.30.0",
+    "@typescript-eslint/parser": "^4.30.0",
+    "cross-env": "^7.0.3",
+    "eslint": "^7.32.0",
+    "eslint-plugin-jsdoc": "^36.0.8",
+    "eslint-plugin-prefer-arrow": "^1.2.3",
+    "nodemon": "^2.0.12",
     "npm-run-all": "^4.1.5",
-    "typescript": "^3.9.3"
+    "typescript": "^4.4.2"
   }
 }

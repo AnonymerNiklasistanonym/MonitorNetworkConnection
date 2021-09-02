@@ -1,7 +1,9 @@
 document.addEventListener('DOMContentLoaded', async () => {
 
 
-	const data = await fetch("data.csv").then(res => res.text()).then(parseCsvData)
+	const data = await fetch("data.csv").then(res => res.text()).then(parseCsvData).catch(err => {
+		console.error("Error was thrown:", err)
+	})
 
 	const chartColors = {
 		red: 'rgb(255, 99, 132)',

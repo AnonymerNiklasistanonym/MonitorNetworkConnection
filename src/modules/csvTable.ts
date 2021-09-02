@@ -2,7 +2,7 @@ import { createObjectCsvWriter } from "csv-writer";
 import { promises as fs } from "fs";
 import path from "path";
 
-export enum TestUrlConnectionState {
+export const enum TestUrlConnectionState {
     CONNECTION = "CONNECTION",
     DNS_LOOKUP_FAILED = "DNS_LOOKUP_FAILED",
     NO_CONNECTION = "NO_CONNECTION",
