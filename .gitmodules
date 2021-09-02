@@ -4,3 +4,6 @@
 [submodule "analysis_cpp/fmt"]
 	path = analysis_cpp/fmt
 	url = https://github.com/fmtlib/fmt.git
+[submodule "analysis_cpp/date"]
+	path = analysis_cpp/date
+	url = https://github.com/HowardHinnant/date.git

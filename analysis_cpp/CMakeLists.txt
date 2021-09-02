@@ -27,12 +27,13 @@ if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/../.git")
     endif()
 else()
     # Error when not cloned via git
-    ## TODO: Find solution how to download the submodule even though the source code is from a tarball
     message(FATAL_ERROR "Not a git repository or git was not found")
 endif()
 
-add_subdirectory(fmt)
+add_subdirectory(fmt bin_fmt EXCLUDE_FROM_ALL)
+add_subdirectory(date bin_date EXCLUDE_FROM_ALL)
 
-add_executable(${PROJECT_NAME} main.cpp)
+add_executable(${PROJECT_NAME} main.cpp csv_file_reader.cpp)
 target_include_directories(${PROJECT_NAME} PRIVATE fast-cpp-csv-parser)
-target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt Threads::Threads)
+target_include_directories(${PROJECT_NAME} PRIVATE date/include)
+target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt date::date Threads::Threads)
