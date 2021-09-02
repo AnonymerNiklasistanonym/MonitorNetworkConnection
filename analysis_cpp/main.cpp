@@ -17,9 +17,8 @@ namespace std_format = fmt;
 // (https://github.com/ben-strasser/fast-cpp-csv-parser)
 #include "csv.h"
 
-#include "date/date.h"
-
 #include "csv_file_reader.hpp"
+#include "plot_graph.hpp"
 
 //! Helper function to measure time difference.
 template <typename U = std::chrono::milliseconds, typename T>

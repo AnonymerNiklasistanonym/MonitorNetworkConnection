@@ -1,12 +1,7 @@
 #include "csv_file_reader.hpp"
 
 #include <cstdlib>
-
-// Include header to easily read CSV files:
-// (https://github.com/ben-strasser/fast-cpp-csv-parser)
-#include "csv.h"
-// Define the format of the CSV file
-using CsvReader = io::CSVReader<8, io::trim_chars<' '>, io::no_quote_escape<','>>;
+#include <string>
 
 // C++20 format library is not yet implemented in most compilers
 #if __has_include(<format>)
@@ -19,7 +14,11 @@ namespace std_format = std;
 namespace std_format = fmt;
 #endif
 
-
+// Include header to easily read CSV files:
+// (https://github.com/ben-strasser/fast-cpp-csv-parser)
+#include "csv.h"
+// Define the format of the CSV file
+using CsvReader = io::CSVReader<8, io::trim_chars<' '>, io::no_quote_escape<','>>;
 
 
 ConnectionState getConnectionState(const std::string &connectionState)
@@ -39,7 +38,7 @@ ConnectionState getConnectionState(const std::string &connectionState)
         }
     }
 
-std::shared_ptr<CsvFileEntries> readCsvFile(const std::filesystem::path &filePath)
+DataPointCollection readCsvFile(const std::filesystem::path &filePath)
 {
     // Check if file exists and a regular file
     if (!std::filesystem::exists(filePath)) {
@@ -65,7 +64,7 @@ std::shared_ptr<CsvFileEntries> readCsvFile(const std::filesystem::path &filePat
                                      "CONNECTION_SPEED_MS_AVG", "CONNECTION_SPEED_MS_MAX", "CONNECTION_SPEED_MS_MIN");
 
     // Create container for CSV entries
-    auto csvEntries = std::make_shared<CsvFileEntries>();
+    auto csvEntries = std::make_shared<DataPoints>();
     // Create variables for each column
     std::string dateIso;
     std::string url;
