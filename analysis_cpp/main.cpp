@@ -19,6 +19,7 @@ namespace std_format = fmt;
 
 #include "csv_file_reader.hpp"
 #include "plot_graph.hpp"
+#include "time_converter.hpp"
 
 //! Helper function to measure time difference.
 template <typename U = std::chrono::milliseconds, typename T>
@@ -52,13 +53,16 @@ int main()
 {
     const auto dataPath = std::filesystem::path("..")  / ".." / "data" / "data.csv";
 
-    try {
-        auto readCsvFileTimeBegin = std::chrono::high_resolution_clock::now();
-        auto csvFileEntries = readCsvFile(dataPath);
-        auto readCsvFileTimeEnd = std::chrono::high_resolution_clock::now();
+    std::cout << std_format::format("Read CSV file: '{}'", dataPath.string()) << std::endl;
 
-        std::cout << std_format::format("Time to read CSV file: {} ms",
-                                        getTimeDifference(readCsvFileTimeBegin, readCsvFileTimeEnd)) << std::endl;
+    try {
+        const auto readCsvFileTimeBegin = std::chrono::high_resolution_clock::now();
+        const auto csvFileEntries = readCsvFile(dataPath);
+        const auto readCsvFileTimeEnd = std::chrono::high_resolution_clock::now();
+
+        const auto timeDifferenceInMs = getTimeDifference(readCsvFileTimeBegin, readCsvFileTimeEnd);
+        std::cout << std_format::format("Time to read CSV file: {}ms ({}s)",
+                                        timeDifferenceInMs, timeDifferenceInMs / 1000) << std::endl;
 
         std::size_t count = 0;
         for (auto const &csvFileEntry : *csvFileEntries) {
@@ -79,27 +83,41 @@ int main()
         //std::time_t to;
         //std::ctime(&to);
 
-        time_t from = csvFileEntries->at(0).dateTimeT;
-        time_t to = csvFileEntries->at(csvFileEntries->size() - 1).dateTimeT;
-        std::optional<float> maxValue = { 1000 };
-        std::optional<std::string> specificUrl = {};
+        const time_t from = csvFileEntries->at(0).dateTimeT;
+        //const time_t from = convertIso8601DateStringToLocalTimeT("2021-09-14T00:00:00.000Z");
+        const time_t to = csvFileEntries->at(csvFileEntries->size() - 1).dateTimeT;
+        //const time_t to = convertIso8601DateStringToLocalTimeT("2021-09-15T00:00:00.000Z");
+        const std::optional<float> maxValue = { 1000 };
+        const std::optional<std::string> specificUrl = {};
         const auto gnuplotPathPng = std::filesystem::path("..")  / ".." / "data" / "gnuplot.png";
         const GnuPlotOptions gnuPlotOptionsPng = {
             .title = "Avg connection speed time",
-            .size = { 1920 * 8, 1080 * 2 },
+            .size = { 1920 * 16, 1080 * 2 },
             .outputType = GnuPlotOutputType::PNG_FILE,
         };
+        std::cout << std_format::format("Plot a GnuPlot graph from {} to {} and save it in {}",
+                                        convertLocalTimeTToIso8601DateString(from),
+                                        convertLocalTimeTToIso8601DateString(to),
+                                        gnuplotPathPng.string()) << std::endl;
+        const auto plotGraphTimeBegin = std::chrono::high_resolution_clock::now();
         plotAvgConnectionSpeedTimelineGnuPlot(csvFileEntries, from, to, gnuplotPathPng, gnuPlotOptionsPng,
                                               specificUrl, maxValue);
+        const auto plotGraphTimeEnd = std::chrono::high_resolution_clock::now();
 
-        const auto gnuplotPathPdf = std::filesystem::path("..")  / ".." / "data" / "gnuplot.pdf";
-        const GnuPlotOptions gnuPlotOptionsPdf = {
-            .title = "Avg connection speed time",
-            .size = { 1920 * 8, 1080 * 2 },
-            .outputType = GnuPlotOutputType::PDF_FILE,
-        };
-        plotAvgConnectionSpeedTimelineGnuPlot(csvFileEntries, from, to, gnuplotPathPdf, gnuPlotOptionsPdf,
-                                              specificUrl, maxValue);
+        const auto plotGraphTimeDifferenceInMs = getTimeDifference(plotGraphTimeBegin, plotGraphTimeEnd);
+        std::cout << std_format::format("Time to plot graph: {}ms ({}s)",
+                                        plotGraphTimeDifferenceInMs, plotGraphTimeDifferenceInMs / 1000) << std::endl;
+
+        // Rendering many data points in a PDF takes to long to be useful but can be cool
+        // if there are not that many
+        //const auto gnuplotPathPdf = std::filesystem::path("..")  / ".." / "data" / "gnuplot.pdf";
+        //const GnuPlotOptions gnuPlotOptionsPdf = {
+        //    .title = "Avg connection speed time",
+        //    .size = { 1920 * 16, 1080 * 2 },
+        //    .outputType = GnuPlotOutputType::PDF_FILE,
+        //};
+        //plotAvgConnectionSpeedTimelineGnuPlot(csvFileEntries, from, to, gnuplotPathPdf, gnuPlotOptionsPdf,
+        //                                      specificUrl, maxValue);
     }
     catch (const CsvFileReadException &e) {
         std::cerr << std_format::format("Exception was thrown while reading the CSV file: {}",

@@ -1,7 +1,6 @@
 #include "csv_file_reader.hpp"
 
-#include <cstdlib>
-#include <string>
+#include "time_converter.hpp"
 
 // C++20 format library is not yet implemented in most compilers
 #if __has_include(<format>)
@@ -37,18 +36,6 @@ ConnectionState getConnectionState(const std::string &connectionState)
                                        connectionState));
         }
     }
-
-std::time_t convertIso8601DateStringToLocalTimeT(const std::string &time_string)
-{
-    tzset();
-
-    struct tm ctime;
-    memset(&ctime, 0, sizeof(struct tm));
-    strptime(time_string.c_str(), "%FT%T%z", &ctime);
-
-    std::time_t ts = mktime(&ctime) - timezone;
-    return ts;
-}
 
 DataPointCollection readCsvFile(const std::filesystem::path &filePath)
 {
