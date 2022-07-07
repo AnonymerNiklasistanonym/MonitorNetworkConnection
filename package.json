@@ -27,7 +27,7 @@
     "csv-parser": "^3.0.0",
     "csv-writer": "^1.6.0",
     "express": "^4.17.1",
-    "moment": "^2.29.1",
+    "moment": "^2.29.4",
     "tcp-ping": "^0.1.1"
   },
   "devDependencies": {
